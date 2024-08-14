@@ -1,41 +1,33 @@
 package controllers
 
 import (
-	"encoding/json"
-	"go-api-crud/config"
+	"go-api-crud/database"
+	"go-api-crud/models"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type User struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-func Register(w http.ResponseWriter, r *http.Request) {
-	var user User
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+func RegisterUser(context *gin.Context) {
+	var user models.User
+	if err := context.ShouldBindJSON(&user); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
 		return
 	}
 
-	// Suponiendo que tienes una función para insertar el usuario en la base de datos
-	err = insertUser(user)
-	if err != nil {
-		http.Error(w, "Could not create user", http.StatusInternalServerError)
+	if err := user.HashPassword(user.Password); err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully"})
-}
+	record := database.Instance.Create(&user)
+	if record.Error != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": record.Error.Error()})
+		context.Abort()
+		return
+	}
 
-// Función para insertar el usuario en la base de datos
-func insertUser(user User) error {
-	// Lógica para insertar el usuario en la base de datos
-	// Ejemplo de inserción usando MySQL
-	_, err := config.DB.Exec("INSERT INTO users (username, password) VALUES (?, ?)", user.Username, user.Password)
-	return err
+	context.JSON(http.StatusCreated, gin.H{"userId": user.ID, "email": user.Email, "username": user.Username})
 }
