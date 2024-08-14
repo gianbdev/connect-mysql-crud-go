@@ -1,9 +1,10 @@
 package controllers
 
 import (
-	"github.com/gianbdev/go-api-crud/auth"
-	"github.com/gianbdev/go-api-crud/database"
-	"github.com/gianbdev/go-api-crud/models"
+	"go-api-crud/auth"
+	"go-api-crud/database"
+	"go-api-crud/models"
+
 	"github.com/gin-gonic/gin"
 )
 
