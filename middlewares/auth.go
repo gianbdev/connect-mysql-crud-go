@@ -8,18 +8,20 @@ import (
 
 func Auth() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		tokenString := context.GetHeader("Authorization")
+		authorizationHeader := context.GetHeader("Authorization")
+		tokenString := authorizationHeader[len("Bearer "):]
 		if tokenString == "" {
-			context.JSON(401, gin.H{"error": "request does not contain an access token"})
+			context.JSON(401, gin.H{"error": "Authorization header required"})
 			context.Abort()
 			return
 		}
-		err := auth.ValidateToken(tokenString)
+		_, err := auth.ValidateToken(tokenString)
 		if err != nil {
 			context.JSON(401, gin.H{"error": err.Error()})
 			context.Abort()
 			return
 		}
+
 		context.Next()
 	}
 }

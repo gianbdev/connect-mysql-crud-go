@@ -1,2 +1,4 @@
 /cmd/server
 .env
+# Binary
+/go-api-crud
