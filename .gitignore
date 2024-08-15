@@ -1,4 +1,6 @@
 /cmd/server
+/migrations
 .env
+
 # Binary
 /go-api-crud
