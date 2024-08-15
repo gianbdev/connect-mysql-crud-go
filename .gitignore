@@ -1,6 +1,7 @@
+# x86
 /cmd/server
 /migrations
 .env
 
-# Binary
+# Binary $%#@
 /go-api-crud
